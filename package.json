@@ -1,0 +1,15 @@
+{
+  "name": "plant-disease-detector-tests",
+  "version": "1.0.0",
+  "description": "Selenium tests for Plant Disease Detector",
+  "main": "app.test.js",
+  "scripts": {
+    "test": "mocha app.test.js --reporter json > test-results.json && mocha app.test.js"
+  },
+  "dependencies": {
+    "selenium-webdriver": "^4.15.0",
+    "chromedriver": "^119.0.0",
+    "mocha": "^10.2.0",
+    "chai": "^4.3.10"
+  }
+}
