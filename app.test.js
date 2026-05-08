@@ -1,5 +1,8 @@
-const { Builder, Capabilities } = require('selenium-webdriver');
-const chrome = require('selenium-webdriver/chrome');
+// Replace the require lines with these:
+import { Builder, Capabilities } from 'selenium-webdriver';
+import chrome from 'selenium-webdriver/chrome.js'; 
+
+// The rest of your code stays the same...
 
 let options = new chrome.Options();
 options.addArguments('--headless'); // Required for Docker/Jenkins
