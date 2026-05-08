@@ -1,7 +1,6 @@
 import { Builder, By, until } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome.js';
 import assert from 'assert';
-import fs from 'fs';
 
 describe('Plant Disease Detector Tests', function() {
     let driver;
@@ -19,22 +18,6 @@ describe('Plant Disease Detector Tests', function() {
     });
 
     afterEach(async function() {
-        if (this.currentTest.state === 'failed') {
-            try {
-                // Log the page source to the console to see what the browser is actually seeing
-                const source = await driver.getPageSource();
-                console.log("--- DEBUG: PAGE SOURCE ON FAILURE ---");
-                console.log(source);
-                console.log("---------------------------------------");
-
-                // Fixed filename to avoid illegal characters like ':' or '/'
-                let safeTitle = this.currentTest.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-                let image = await driver.takeScreenshot();
-                fs.writeFileSync(`${safeTitle}.png`, image, 'base64');
-            } catch (err) {
-                console.log("Could not capture debug info: " + err.message);
-            }
-        }
         if (driver) await driver.quit();
     });
 
@@ -44,13 +27,13 @@ describe('Plant Disease Detector Tests', function() {
         assert.ok(title.length > 0);
     });
 
-    // Test 2: Aggressive check for ANY interactive element
-    it('Test 2: Should find upload button on homepage', async function() {
+    // FIXED: Now looking for the "Start Diagnosis" button found in your debug log
+    it('Test 2: Should find CTA button on homepage', async function() {
         await driver.get(APP_URL);
-        const uploadXpath = "//input | //button | //*[contains(@class, 'upload')] | //*[contains(text(), 'pload')]";
-        await driver.wait(until.elementLocated(By.xpath(uploadXpath)), 15000);
-        const element = await driver.findElement(By.xpath(uploadXpath));
-        assert.ok(element);
+        const ctaXpath = "//*[contains(text(), 'Start Diagnosis')] | //*[contains(text(), 'Diagnose')] | //a[contains(@href, 'diagnose')]";
+        await driver.wait(until.elementLocated(By.xpath(ctaXpath)), 10000);
+        const ctaBtn = await driver.findElement(By.xpath(ctaXpath));
+        assert.ok(ctaBtn);
     });
 
     it('Test 3: Should have correct page title', async function() {
@@ -60,13 +43,13 @@ describe('Plant Disease Detector Tests', function() {
 
     it('Test 4: Should display header/logo', async function() {
         await driver.get(APP_URL);
-        const header = await driver.findElement(By.xpath("//h1 | //h2 | //header | //body"));
+        const header = await driver.findElement(By.xpath("//h1 | //h2 | //header | //*[contains(text(), 'PlantCare')]"));
         assert.ok(await header.isDisplayed());
     });
 
     it('Test 5: Should have navigation menu', async function() {
         await driver.get(APP_URL);
-        const nav = await driver.findElements(By.css('nav, ul, div, body'));
+        const nav = await driver.findElements(By.css('nav, ul, li, a'));
         assert.ok(nav.length > 0);
     });
 
@@ -76,20 +59,16 @@ describe('Plant Disease Detector Tests', function() {
         assert.ok(footer.length > 0);
     });
 
-    // Test 7: Broadened to find ANY clickable item if button is missing
     it('Test 7: Should have submit/analyze button', async function() {
         await driver.get(APP_URL);
-        const btnXpath = "//button | //input[@type='submit'] | //a | //div[@role='button']";
-        await driver.wait(until.elementLocated(By.xpath(btnXpath)), 15000);
-        const buttons = await driver.findElements(By.xpath(btnXpath));
-        assert.ok(buttons.length > 0);
+        const btn = await driver.findElements(By.xpath("//button | //a | //input[@type='submit']"));
+        assert.ok(btn.length > 0);
     });
 
-    // Test 8: Simplified to stop blocking the pipeline
-    it('Test 8: Page should contain inputs', async function() {
+    it('Test 8: Page should contain interactive elements', async function() {
         await driver.get(APP_URL);
-        const inputs = await driver.findElements(By.css('input, button, div'));
-        assert.ok(inputs.length > 0);
+        const elements = await driver.findElements(By.css('a, button, input'));
+        assert.ok(elements.length > 0);
     });
 
     it('Test 9: Should have results display section', async function() {
@@ -125,7 +104,7 @@ describe('Plant Disease Detector Tests', function() {
     it('Test 14: Page should load quickly', async function() {
         const startTime = Date.now();
         await driver.get(APP_URL);
-        assert.ok((Date.now() - startTime) < 15000);
+        assert.ok((Date.now() - startTime) < 10000);
     });
 
     it('Test 15: Should have main content container', async function() {
