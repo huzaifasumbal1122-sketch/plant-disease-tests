@@ -1,17 +1,21 @@
 FROM node:20-alpine
 WORKDIR /app
 
-# Install browser and driver
+# Install chromium and bash
 RUN apk add --no-cache chromium chromium-chromedriver bash
 
+# Copy dependency files
 COPY package.json package-lock.json* ./
-RUN npm install
 
+# Install ALL dependencies (including devDependencies like mocha)
+RUN npm install --include=dev
+
+# Copy the rest of the code
 COPY . .
 
-# Ensure the files are actually there (helps debugging if it fails again)
-RUN ls -la
+# Ensure the app.test.js exists and mocha is executable
+RUN chmod +x ./node_modules/.bin/mocha
 
-# Use npx to run mocha - it handles the pathing for you
-# The --exit flag ensures the container stops once tests are done
-CMD ["npx", "mocha", "app.test.js", "--timeout", "30000", "--exit"]
+# Use the direct path to mocha to avoid any 'command not found' silent errors
+ENTRYPOINT ["./node_modules/.bin/mocha"]
+CMD ["app.test.js", "--timeout", "30000", "--exit"]
