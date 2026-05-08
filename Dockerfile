@@ -1,43 +1,44 @@
-# --- STAGE 1: Install dependencies ---
+# --- STAGE 1: Dependency Management ---
 FROM node:18-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy package files
 COPY package.json package-lock.json* ./
 RUN npm ci
 
-# --- STAGE 2: Build the application ---
+# --- STAGE 2: Building the App ---
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Copy node_modules from deps stage
+# Copy modules and source
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# IMPORTANT: Define the Build Arguments
-# These allow Next.js to see the variables during 'npm run build'
+# Receive Build Arguments from Jenkins
 ARG MONGODB_URI
-ENV MONGODB_URI=$MONGODB_URI
+ARG NEXTAUTH_URL
+ARG NEXTAUTH_SECRET
 
-# Next.js collects anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
+# Set as Environment Variables for the 'npm run build' process
+ENV MONGODB_URI=$MONGODB_URI
+ENV NEXTAUTH_URL=$NEXTAUTH_URL
+ENV NEXTAUTH_SECRET=$NEXTAUTH_SECRET
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build
 
-# --- STAGE 3: Production runner ---
+# --- STAGE 3: Final Production Image ---
 FROM node:18-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Create a non-privileged user for security
+# Security: Run as a non-root user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy only the necessary files from the builder
+# Copy only compiled assets
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
@@ -46,8 +47,6 @@ COPY --from=builder /app/package.json ./package.json
 USER nextjs
 
 EXPOSE 3000
-
 ENV PORT=3000
 
-# Start the application
 CMD ["npm", "start"]
