@@ -1,12 +1,7 @@
 {
-  "name": "plant-disease-tests",
-  "version": "1.0.0",
-  "devDependencies": {
-    "mocha": "^10.2.0",
+  "dependencies": {
     "selenium-webdriver": "^4.10.0",
-    "chromedriver": "^114.0.0"
-  },
-  "scripts": {
-    "test": "mocha *.js"
+    "mocha": "^10.2.0",
+    "assert": "^2.0.0"
   }
 }
