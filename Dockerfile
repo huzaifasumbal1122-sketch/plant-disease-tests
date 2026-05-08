@@ -1,21 +1,14 @@
 FROM node:20-alpine
 WORKDIR /app
 
-# Install chromium and bash
 RUN apk add --no-cache chromium chromium-chromedriver bash
 
-# Copy dependency files
 COPY package.json package-lock.json* ./
+RUN npm install
 
-# Install ALL dependencies (including devDependencies like mocha)
-RUN npm install --include=dev
-
-# Copy the rest of the code
 COPY . .
 
-# Ensure the app.test.js exists and mocha is executable
-RUN chmod +x ./node_modules/.bin/mocha
-
-# Use the direct path to mocha to avoid any 'command not found' silent errors
+# Entrypoint is the base command
 ENTRYPOINT ["./node_modules/.bin/mocha"]
+# CMD is the default argument passed to the entrypoint
 CMD ["app.test.js", "--timeout", "30000", "--exit"]
