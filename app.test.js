@@ -1,13 +1,15 @@
-const { Builder, By, until } = require('selenium-webdriver');
+const { Builder, Capabilities } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
-const assert = require('assert');
 
-// Configure Chrome options for headless mode
-const chromeOptions = new chrome.Options();
-chromeOptions.addArguments('--headless');
-chromeOptions.addArguments('--no-sandbox');
-chromeOptions.addArguments('--disable-dev-shm-usage');
-chromeOptions.addArguments('--disable-gpu');
+let options = new chrome.Options();
+options.addArguments('--headless'); // Required for Docker/Jenkins
+options.addArguments('--no-sandbox');
+options.addArguments('--disable-dev-shm-usage');
+
+let driver = await new Builder()
+    .forBrowser('chrome')
+    .setChromeOptions(options)
+    .build();
 
 const APP_URL = 'http://localhost:3000'; // Change to your app's URL
 
