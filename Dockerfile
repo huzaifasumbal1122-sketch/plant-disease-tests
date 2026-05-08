@@ -1,35 +1,17 @@
-# Stage 1: Install dependencies
-FROM node:18-alpine AS deps
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci
+# Use Node 20 to satisfy selenium-webdriver requirements
+FROM node:20-alpine
 
-# Stage 2: Build
-FROM node:18-alpine AS builder
+# Install dependencies for Chrome/Selenium if needed
+RUN apk add --no-cache chromium chromium-chromedriver bash
+
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+
+COPY package.json package-lock.json* ./
+
+# Use 'npm install' instead of 'npm ci' to resolve the lockfile sync issues
+RUN npm install
+
 COPY . .
 
-ARG MONGODB_URI
-ARG NEXTAUTH_URL
-ARG NEXTAUTH_SECRET
-
-ENV MONGODB_URI=$MONGODB_URI
-ENV NEXTAUTH_URL=$NEXTAUTH_URL
-ENV NEXTAUTH_SECRET=$NEXTAUTH_SECRET
-
-RUN npm run build
-
-# Stage 3: Runner (The only stage that stays on disk)
-FROM node:18-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-
-EXPOSE 3000
-CMD ["npm", "start"]
+# Run tests
+CMD ["npm", "test"]
