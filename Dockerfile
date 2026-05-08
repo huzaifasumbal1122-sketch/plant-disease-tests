@@ -9,5 +9,9 @@ RUN npm install
 
 COPY . .
 
-# Run via mocha instead of node
-CMD ["./node_modules/.bin/mocha", "app.test.js", "--timeout", "30000"]
+# Ensure the files are actually there (helps debugging if it fails again)
+RUN ls -la
+
+# Use npx to run mocha - it handles the pathing for you
+# The --exit flag ensures the container stops once tests are done
+CMD ["npx", "mocha", "app.test.js", "--timeout", "30000", "--exit"]
