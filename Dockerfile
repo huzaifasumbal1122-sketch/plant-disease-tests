@@ -1,17 +1,13 @@
-# Use Node 20 to satisfy selenium-webdriver requirements
 FROM node:20-alpine
-
-# Install dependencies for Chrome/Selenium if needed
-RUN apk add --no-cache chromium chromium-chromedriver bash
-
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
+# Install browser and driver
+RUN apk add --no-cache chromium chromium-chromedriver bash
 
-# Use 'npm install' instead of 'npm ci' to resolve the lockfile sync issues
+COPY package.json package-lock.json* ./
 RUN npm install
 
 COPY . .
 
-# Run tests
-CMD ["node", "test.js"]
+# Match the exact filename you found
+CMD ["node", "app.test.js"]
