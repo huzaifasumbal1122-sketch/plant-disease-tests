@@ -1,6 +1,6 @@
 FROM node:18-slim
 
-# Install Chrome for Selenium
+# Install Chrome for headless Selenium testing
 RUN apt-get update && apt-get install -y \
     wget gnupg unzip curl \
     google-chrome-stable \
@@ -8,12 +8,12 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy your package.json and install dependencies
+# Copy package.json and install dependencies
 COPY package*.json ./
 RUN npm install
 
-# Copy your test scripts
+# Copy the rest of your JS test files
 COPY . .
 
-# Run Mocha tests (ensure 'test' script in package.json is "mocha your_test_file.js")
-CMD ["npm", "test"]
+# Run your tests using Mocha
+CMD ["npx", "mocha", "*.js", "--timeout", "30000"]
