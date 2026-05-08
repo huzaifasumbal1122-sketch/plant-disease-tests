@@ -9,5 +9,5 @@ RUN npm install
 
 COPY . .
 
-# Match the exact filename you found
-CMD ["node", "app.test.js"]
+# Run via mocha instead of node
+CMD ["./node_modules/.bin/mocha", "app.test.js", "--timeout", "30000"]
